@@ -21,8 +21,22 @@ default["zeal"]["packages"] = %w(
   zeal
 )
 
-default["zeal"]["zypper"]["enabled"] = true
-default["zeal"]["zypper"]["alias"] = "devel-tools"
-default["zeal"]["zypper"]["title"] = "Generic Development Tools"
-default["zeal"]["zypper"]["repo"] = "http://download.opensuse.org/repositories/devel:/tools/openSUSE_#{node["platform_version"].to_i.to_s == node["platform_version"] ? "Factory" : node["platform_version"]}/"
-default["zeal"]["zypper"]["key"] = "#{node["zeal"]["zypper"]["repo"]}repodata/repomd.xml.key"
+case node["platform_family"]
+when "suse"
+  repo = case node["platform_version"]
+  when /\A13\.\d+\z/
+    "openSUSE_#{node["platform_version"]}"
+  when /\A42\.\d+\z/
+    "openSUSE_Leap_#{node["platform_version"]}"
+  when /\A\d{8}\z/
+    "openSUSE_Factory"
+  else
+    raise "Unsupported SUSE version"
+  end
+
+  default["zeal"]["zypper"]["enabled"] = true
+  default["zeal"]["zypper"]["alias"] = "devel-tools"
+  default["zeal"]["zypper"]["title"] = "Generic Development Tools"
+  default["zeal"]["zypper"]["repo"] = "http://download.opensuse.org/repositories/devel:/tools/#{repo}/"
+  default["zeal"]["zypper"]["key"] = "#{node["zeal"]["zypper"]["repo"]}repodata/repomd.xml.key"
+end
